@@ -1,0 +1,46 @@
+﻿<html>
+  <head>
+    <title>Allo Multinode</title>
+    <meta content="">
+    <style></style>
+
+    <script type="text/javascript" src="URLFacile.js"></script>
+
+    <script type="text/javascript" src="MultiNode.js"></script>
+
+    <script type="text/javascript">
+
+        var url = new URLFacile();
+        var pseudonyme = url.get('pseudo');
+        console.log("pseudonyme = " + pseudonyme);
+
+        var serveurJeu = new MultiNode();
+
+        serveurJeu.confirmerConnexion = function(){
+            console.log("Je suis connecte.");
+            serveurJeu.demanderAuthentification(pseudonyme);
+            serveurJeu.posterVariableTextuelle("argent", "million");
+        }
+
+        serveurJeu.confirmerAuthentification = function(listePseudo){
+            console.log("Je suis authentifie.");
+            console.log("Les autres participants sont " + JSON.stringify(listePseudo));
+        }
+
+        serveurJeu.apprendreAuthentification = function(pseudonyme){
+            console.log("Nouvel ami " + pseudonyme);
+        }
+
+        serveurJeu.recevoirVariable = function(variable){
+            console.log("Surcharge de recevoirVariable " + variable.cle + " = " + variable.valeur);
+        }
+
+        serveurJeu.connecter();
+
+    </script>
+
+  </head>
+  <body>
+    <h1>Allo Multinode</h1>
+  </body>
+</html>
