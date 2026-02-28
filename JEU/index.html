@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>DÉ - Authentification</title>
+    <script src="lib/MultiNode.js"></script>
+    <script defer src="Jeu.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Jeu de Dés</h1>
+    <form id="formulaire-authentification">
+        <fieldset>
+            <label for="champ-pseudonyme">Pseudonyme</label>
+            <input type="text" id="champ-pseudonyme" required />
+            <input type="submit" value="Authentification" id="bouton-authentification" />
+        </fieldset>
+    </form>
+    <form id="formulaire-jeu" style="display: none;">
+        <fieldset>
+            <legend>Message de Tour</legend>
+            <p id="message-tour" style="font-weight: bold;"></p>
+        </fieldset>
+        <fieldset>
+            <legend>Score </legend>
+            <input type="text" id="champ-score" value="" readonly />
+        </fieldset>
+        <input type="submit" value="Jouer" id="bouton-jouer" />
+         <input type="text" id="champ-jouer" readonly />
+        <fieldset>
+            <legend>Resultat lancé deux dés</legend>
+            <label for="champ-de-1">Dé 1:</label>
+            <input type="text" id="champ-de-1" readonly />
+            <label for="champ-de-2">Dé 2:</label>
+            <input type="text" id="champ-de-2" readonly />
+        </fieldset>
+        <fieldset>
+            <legend id="information-autre-joueur">Score {nom-autre-joueur}</legend>
+            <input type="text" id="champ-score-autre-joueur" value="" readonly />
+        </fieldset>
+         <fieldset>
+            <legend> Tour </legend>
+            <input type="text" id="champ-tour" value="" readonly />
+        </fieldset>
+    </form>
+    <p id="resultat-partie"></p>
+</body>
+</html>
