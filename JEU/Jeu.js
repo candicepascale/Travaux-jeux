@@ -97,6 +97,42 @@ class Jeu {
     console.log(`Début du Tour ${this.compteurTour}`);
   }
 
+  sauvegarderDonneesLocal(donnees = this.donnees) {
+    localStorage.setItem(Jeu.CLE_STOCKAGE, JSON.stringify(donnees));
+  }
+
+  enregistrerPseudonyme() {
+    this.donnees.pseudonyme = this.pseudonymeJoueur;
+    this.sauvegarderDonneesLocal();
+  }
+
+  incrementerVictoire() {
+    this.donnees.statistiques.victoires += 1;
+    this.sauvegarderDonneesLocal();
+  }
+
+  incrementerDefaite() {
+    this.donnees.statistiques.defaites += 1;
+    this.sauvegarderDonneesLocal();
+  }
+
+  // =========================
+  // INTERFACE
+  // =========================
+
+  mettreAJourInterfaceInitiale() {
+    this.champTour.value = "En attente d’un second joueur";
+    this.messageTour.innerText = "Connectez-vous pour démarrer la partie.";
+    this.resultatFinal.innerText = "";
+    this.mettreAJourStatut("Prêt");
+  }
+
+  mettreAJourStatut(message) {
+    if (this.zoneStatut) {
+      this.zoneStatut.innerText = message;
+    }
+  }
+
   recevoirVariable(variable) {
     console.log("recevoirVariable " + variable.cle + " = " + variable.valeur);
     let message = JSON.parse(variable.valeur);
