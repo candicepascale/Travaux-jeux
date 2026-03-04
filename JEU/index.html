@@ -2,47 +2,126 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>DÉ - Authentification</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Jeu de Dés Multijoueur</title>
     <script src="lib/MultiNode.js"></script>
     <script defer src="Jeu.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Jeu de Dés</h1>
-    <form id="formulaire-authentification">
-        <fieldset>
-            <label for="champ-pseudonyme">Pseudonyme</label>
-            <input type="text" id="champ-pseudonyme" required />
-            <input type="submit" value="Authentification" id="bouton-authentification" />
-        </fieldset>
-    </form>
-    <form id="formulaire-jeu" style="display: none;">
-        <fieldset>
-            <legend>Message de Tour</legend>
-            <p id="message-tour" style="font-weight: bold;"></p>
-        </fieldset>
-        <fieldset>
-            <legend>Score </legend>
-            <input type="text" id="champ-score" value="" readonly />
-        </fieldset>
-        <input type="submit" value="Jouer" id="bouton-jouer" />
-         <input type="text" id="champ-jouer" readonly />
-        <fieldset>
-            <legend>Resultat lancé deux dés</legend>
-            <label for="champ-de-1">Dé 1:</label>
-            <input type="text" id="champ-de-1" readonly />
-            <label for="champ-de-2">Dé 2:</label>
-            <input type="text" id="champ-de-2" readonly />
-        </fieldset>
-        <fieldset>
-            <legend id="information-autre-joueur">Score {nom-autre-joueur}</legend>
-            <input type="text" id="champ-score-autre-joueur" value="" readonly />
-        </fieldset>
-         <fieldset>
-            <legend> Tour </legend>
-            <input type="text" id="champ-tour" value="" readonly />
-        </fieldset>
-    </form>
-    <p id="resultat-partie"></p>
+    <div id="fenetre-regles" class="fenetre-regles">
+    <div class="fenetre-regles-contenu">
+        <h2>Comment jouer ?</h2>
+        <p>Bienvenue dans le jeu de dés multijoueur.</p>
+
+        <ul class="liste-regles">
+            <li>Le jeu se joue à <strong>2 joueurs</strong>.</li>
+            <li>Chaque joueur lance <strong>un dé au début</strong>.</li>
+            <li>Le joueur qui obtient la <strong>valeur la plus élevée commence la partie</strong>.</li>
+            <li>Ensuite, le joueur actif lance <strong>2 dés à chaque tour</strong>.</li>
+            <li>Si les deux dés sont identiques, le joueur <strong>rejoue immédiatement</strong>.</li>
+            <li>Les points du lancer sont ajoutés au score du joueur.</li>
+            <li>Le premier joueur à atteindre ou dépasser <strong>60 points</strong> gagne la partie.</li>
+        </ul>
+
+        <button id="bouton-fermer-regles" type="button">J’ai compris</button>
+    </div>
+  </div>
+    <main class="conteneur-principal">
+        <header class="entete">
+            <h1>🎲 Jeu de Dés Multijoueur</h1>
+
+
+        </header>
+
+        <section class="panel panel-auth">
+            <h2>Connexion joueur</h2>
+            <form id="formulaire-authentification">
+                <fieldset>
+                    <label for="champ-pseudonyme">Pseudonyme</label>
+                    <input type="text" id="champ-pseudonyme" required placeholder="Entrez votre pseudonyme" />
+                    <input type="submit" value="Authentification" id="bouton-authentification" />
+                </fieldset>
+            </form>
+        </section>
+
+        <section id="zone-statut" class="panel zone-statut">
+            Prêt à se connecter
+        </section>
+
+       <form id="formulaire-jeu" class="panel panel-jeu" style="display: none;">
+            <div id="zone-objectif" class="zone-objectif">
+                Objectif : atteindre ou dépasser 60 points pour gagner
+            </div>
+            <div class="grille-jeu">
+                <section class="bloc bloc-tour">
+                    <h2>État de la partie</h2>
+                    <fieldset>
+                        <legend>Message de tour</legend>
+                        <p id="message-tour"></p>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Tour en cours</legend>
+                        <input type="text" id="champ-tour" value="" readonly />
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Dernier lancer initial</legend>
+                        <input type="text" id="champ-jouer" readonly />
+                    </fieldset>
+
+                    <div class="zone-action">
+                        <input type="submit" value="Jouer" id="bouton-jouer" />
+                    </div>
+                </section>
+
+                <section class="bloc bloc-joueurs">
+                    <h2>Joueurs</h2>
+
+                    <div class="zone-joueurs">
+                        <article id="carte-joueur" class="carte-joueur">
+                            <h3>Vous</h3>
+                            <fieldset>
+                                <legend>Votre score</legend>
+                                <input type="text" id="champ-score" value="" readonly />
+                            </fieldset>
+                        </article>
+
+                        <article id="carte-autre-joueur" class="carte-joueur">
+                            <h3 id="information-autre-joueur">Adversaire</h3>
+                            <fieldset>
+                                <legend>Score adversaire</legend>
+                                <input type="text" id="champ-score-autre-joueur" value="" readonly />
+                            </fieldset>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="bloc bloc-des">
+                    <h2>Lancer des dés</h2>
+                    <fieldset>
+                        <legend>Résultat du lancer</legend>
+                        <div class="zone-des">
+                            <div class="de-wrapper">
+                                <label for="champ-de-1">Dé 1</label>
+                                <input type="text" id="champ-de-1" class="de-visuel" readonly />
+                            </div>
+
+                            <div class="de-wrapper">
+                                <label for="champ-de-2">Dé 2</label>
+                                <input type="text" id="champ-de-2" class="de-visuel" readonly />
+                            </div>
+                        </div>
+                    </fieldset>
+                </section>
+            </div>
+        </form>
+
+        <section class="panel panel-resultat">
+            <h2>Résultat final</h2>
+            <p id="resultat-partie"></p>
+        </section>
+    </main>
 </body>
 </html>
