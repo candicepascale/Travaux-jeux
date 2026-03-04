@@ -1,111 +1,335 @@
-/* Styles généraux */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    text-align: center;
+* {
+    box-sizing: border-box;
     margin: 0;
-    padding: 10px;
+    padding: 0;
 }
 
-/* Titre principal */
-h1 {
-    color: #333;
-    font-size: 1.8em;
+/* Structure générale */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+    color: #f8fafc;
+    min-height: 100vh;
+    padding: 24px;
+}
+
+.conteneur-principal {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* En-tête */
+.entete {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.entete h1 {
+    color: #ffffff;
+    font-size: 2.2rem;
     margin-bottom: 10px;
+}
+
+.sous-titre {
+    color: #cbd5e1;
+    font-size: 1rem;
+}
+
+/* Blocs principaux */
+.panel {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(4px);
+}
+
+.panel h2 {
+    margin-bottom: 16px;
+    color: #ffffff;
+    font-size: 1.3rem;
 }
 
 /* Formulaires */
 form {
-    background-color: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.15);
-    width: 300px;
-    margin: 10px auto;
-    text-align: left;
+    width: 100%;
+    margin: 0;
 }
 
-/* Champs de formulaire */
 fieldset {
-    border: none;
-    margin-bottom: 10px;
-    padding: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
 }
 
 legend {
     font-weight: bold;
     font-size: 1em;
-    color: #444;
+    color: #cbd5e1;
+    padding: 0 8px;
 }
 
 /* Labels */
 label {
     display: block;
-    font-size: 0.9em;
+    font-size: 0.95em;
     font-weight: bold;
-    color: #666;
+    color: #e2e8f0;
+    margin-bottom: 8px;
 }
 
-/* Inputs */
+/* Inputs texte */
 input[type="text"] {
-    width: calc(100% - 10px);
-    padding: 6px;
+    width: 100%;
+    padding: 12px 14px;
     margin-top: 4px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 0.9em;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    background: #e2e8f0;
+    color: #0f172a;
 }
 
 /* Boutons */
 input[type="submit"] {
-    background-color: #28a745;
-    color: white;
+    background: #38bdf8;
+    color: #0f172a;
     border: none;
-    padding: 8px;
-    font-size: 0.9em;
-    border-radius: 4px;
+    padding: 12px 18px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 12px;
     cursor: pointer;
     width: 100%;
-    margin-top: 8px;
+    margin-top: 10px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 input[type="submit"]:hover {
-    background-color: #218838;
+    transform: translateY(-1px);
 }
 
 input[type="submit"]:disabled {
-    background-color: #ccc;
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
-/* Section des résultats */
-#message-tour {
-    font-size: 1em;
+/* Zone de statut */
+.zone-statut {
     font-weight: bold;
-    color: #d9534f;
+    color: #e0f2fe;
+    background: rgba(56, 189, 248, 0.18);
+    border: 1px solid rgba(56, 189, 248, 0.25);
     text-align: center;
 }
 
-#resultat-partie {
-    font-size: 1.1em;
+/* Organisation du jeu */
+.grille-jeu {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.bloc {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.bloc h2 {
+    margin-bottom: 14px;
+    font-size: 1.2rem;
+    color: #ffffff;
+}
+
+/* Message de tour */
+#message-tour {
+    font-size: 1.1rem;
     font-weight: bold;
-    color: #0056b3;
-    margin-top: 15px;
+    color: #f8fafc;
+    text-align: center;
+    min-height: 28px;
+}
+
+/* Résultat final */
+#resultat-partie {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #facc15;
+    margin-top: 10px;
+    text-align: center;
+    min-height: 32px;
 }
 
 /* Champs readonly */
 input[readonly] {
-    background-color: #f0f0f0;
+    background: #f1f5f9;
     font-weight: bold;
     text-align: center;
-    color: #333;
-    padding: 5px;
+    color: #0f172a;
 }
 
-/* Responsivité */
+/* Cartes joueurs */
+.zone-joueurs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.carte-joueur {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.carte-joueur h3 {
+    margin-bottom: 10px;
+    color: #ffffff;
+}
+
+.carte-joueur.actif {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 2px #38bdf8, 0 8px 24px rgba(56, 189, 248, 0.25);
+}
+
+/* Dés */
+.zone-des {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.de-wrapper {
+    flex: 1;
+    min-width: 140px;
+}
+
+.de-visuel {
+    text-align: center;
+    font-size: 2rem !important;
+    font-weight: bold;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    height: 90px;
+}
+
+/* Champs principaux centrés */
+#champ-tour,
+#champ-jouer,
+#champ-score,
+#champ-score-autre-joueur,
+#champ-de-1,
+#champ-de-2 {
+    text-align: center;
+}
+
+/* Zone action */
+.zone-action {
+    margin-top: 10px;
+}
+
+/* Section résultat */
+.fenetre-regles {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.fenetre-regles-contenu {
+    background: #ffffff;
+    color: #0f172a;
+    max-width: 650px;
+    width: 100%;
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    text-align: left;
+}
+
+.fenetre-regles-contenu h2 {
+    margin-bottom: 14px;
+    color: #0f172a;
+}
+
+.fenetre-regles-contenu p {
+    margin-bottom: 14px;
+    font-size: 1rem;
+}
+
+.fenetre-regles-contenu .liste-regles {
+    padding-left: 22px;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    color: #1e293b;
+}
+
+.fenetre-regles-contenu .liste-regles li {
+    margin-bottom: 8px;
+}
+.zone-objectif {
+    text-align: center;
+    font-weight: bold;
+    background: rgba(250, 204, 21, 0.15);
+    color: #facc15;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+#bouton-fermer-regles {
+    background: #38bdf8;
+    color: #0f172a;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+#bouton-fermer-regles:hover {
+    transform: translateY(-1px);
+}
+
+.fenetre-cachee {
+    display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .zone-joueurs {
+        grid-template-columns: 1fr;
+    }
+
+    .entete h1 {
+        font-size: 1.8rem;
+    }
+
+    body {
+        padding: 14px;
+    }
+}
+
 @media (max-width: 360px) {
-    form {
-        width: 95%;
-        padding: 10px;
+    .panel {
+        padding: 12px;
+    }
+
+    input[type="text"],
+    input[type="submit"] {
+        font-size: 0.95rem;
+    }
+
+    .de-visuel {
+        height: 75px;
+        font-size: 1.6rem !important;
     }
 }
