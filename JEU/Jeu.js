@@ -2,99 +2,123 @@ class Jeu {
   constructor() {
     this.multiNode = new MultiNode();
     this.multiNode.confirmerConnexion = () => this.confirmerConnexion();
-    this.multiNode.confirmerAuthentification = (autresParticipants) => this.confirmerAuthentification(autresParticipants);
-    this.multiNode.apprendreAuthentification = (pseudonyme) => this.apprendreAuthentification(pseudonyme);
+    this.multiNode.confirmerAuthentification = (autresParticipants) =>
+      this.confirmerAuthentification(autresParticipants);
+    this.multiNode.apprendreAuthentification = (pseudonyme) =>
+      this.apprendreAuthentification(pseudonyme);
     this.multiNode.recevoirVariable = (variable) => this.recevoirVariable(variable);
+
     this.listeJoueur = {};
     this.pseudonymeJoueur = "";
     this.pseudonymeAutreJoueur = "";
+
+    this.scoreMax = 60;
+    this.compteurTour = 1;
+    this.tourEnCours = null;
+    this.desLances = {};
+    this.partieTerminee = false;
+
+    this.phaseJeu = Jeu.PHASE.ATTENTE_JOUEURS;
+
     this.formulaireAuthentification = document.getElementById("formulaire-authentification");
-    this.formulaireAuthentification.addEventListener("submit", (evenementsubmit) => this.soumettreAuthentificationJoueur(evenementsubmit));
+    this.formulaireJeu = document.getElementById("formulaire-jeu");
+
     this.champPseudonyme = document.getElementById("champ-pseudonyme");
     this.boutonAuthentification = document.getElementById("bouton-authentification");
-    this.formulaireJeu = document.getElementById("formulaire-jeu");
-    this.formulaireJeu.addEventListener("submit", (evenementsubmit) => this.soumettreJeu(evenementsubmit));
-    this.formulaireJeu.style.display = "none";
+
     this.champScore = document.getElementById("champ-score");
     this.champJouer = document.getElementById("champ-jouer");
     this.boutonJouer = document.getElementById("bouton-jouer");
     this.informationAutreJoueur = document.getElementById("information-autre-joueur");
     this.champScoreAutreJoueur = document.getElementById("champ-score-autre-joueur");
-    this.desLances = {};
-    this.scoreMax = 60;
-    this.tourEnCours = false;
-    this.compteurTour = 0;
+
     this.champDe1 = document.getElementById("champ-de-1");
     this.champDe2 = document.getElementById("champ-de-2");
     this.champTour = document.getElementById("champ-tour");
-    this.messageTour =  document.getElementById("message-tour");
-    this.resultatFinal= document.getElementById("resultat-partie")
-  }
+    this.messageTour = document.getElementById("message-tour");
+    this.resultatFinal = document.getElementById("resultat-partie");
 
-  mettreAJourTour() {
-    this.champTour.value = `Tour ${this.compteurTour}`;
-    const joueurActif = this.tourEnCours === this.pseudonymeJoueur ? this.pseudonymeJoueur: this.pseudonymeAutreJoueur;
-    this.messageTour.innerText = `${joueurActif}, c'est votre tour !`;
-  }
+    this.zoneStatut = document.getElementById("zone-statut");
+    this.carteJoueur = document.getElementById("carte-joueur");
+    this.carteAutreJoueur = document.getElementById("carte-autre-joueur");
 
-  confirmerConnexion() {
-    console.log("Je suis connecté.");
-    this.pseudonymeJoueur = this.champPseudonyme.value;
-    if (!this.pseudonymeJoueur) {
-      alert("Veuillez entrer un pseudonyme !");
-      return;
+    this.fenetreRegles = document.getElementById("fenetre-regles");
+    this.boutonFermerRegles = document.getElementById("bouton-fermer-regles");
+
+    const reglesDejaVues = localStorage.getItem("regles-vues");
+    if (reglesDejaVues && this.fenetreRegles) {
+      this.fenetreRegles.classList.add("fenetre-cachee");
     }
-    this.multiNode.demanderAuthentification(this.pseudonymeJoueur);
+
+    if (this.boutonFermerRegles) {
+      this.boutonFermerRegles.addEventListener("click", () => {
+        this.fermerFenetreRegles();
+      });
+    }
+
+    this.formulaireAuthentification.addEventListener("submit", (e) =>
+      this.soumettreAuthentificationJoueur(e)
+    );
+    this.formulaireJeu.addEventListener("submit", (e) => this.soumettreJeu(e));
+
+    this.formulaireJeu.style.display = "none";
+
+    this.donnees = this.chargerDonneesLocal();
+    if (this.donnees.pseudonyme) {
+      this.champPseudonyme.value = this.donnees.pseudonyme;
+    }
+
+    this.mettreAJourInterfaceInitiale();
   }
 
-  confirmerAuthentification(autresParticipants) {
-    console.log("Je suis authentifié.");
-    console.log("Les autres participants sont " + JSON.stringify(autresParticipants));
-    this.formulaireAuthentification.querySelector("fieldset").disabled = true;
-    this.ajouterJoueur(this.pseudonymeJoueur);
-    if (autresParticipants.length > 0) {
-      this.pseudonymeAutreJoueur = autresParticipants[0];
-      this.ajouterJoueur(autresParticipants[0]);
-      this.afficherPartie();
+  // =========================
+  // DONNÉES / UPGRADE
+  // =========================
+
+  chargerDonneesLocal() {
+    const brut = localStorage.getItem(Jeu.CLE_STOCKAGE);
+    if (!brut) {
+      return this.creerDonneesParDefaut();
+    }
+
+    try {
+      const donnees = JSON.parse(brut);
+
+      if (!donnees.version) {
+        const migrees = {
+          version: 2,
+          pseudonyme: donnees.pseudonyme || "",
+          statistiques: {
+            victoires: donnees.victoires || 0,
+            defaites: 0
+          },
+          preferences: {
+            theme: "clair"
+          }
+        };
+        this.sauvegarderDonneesLocal(migrees);
+        return migrees;
+      }
+
+      return donnees;
+    } catch (erreur) {
+      console.error("Erreur lecture données locales :", erreur);
+      return this.creerDonneesParDefaut();
     }
   }
 
-  apprendreAuthentification(pseudonyme) {
-    console.log("Nouvel ami connecté : " + pseudonyme);
-    this.ajouterJoueur(pseudonyme);
-    this.pseudonymeAutreJoueur = pseudonyme;
-    console.log("pseudonymeAutreJoueur défini : " + this.pseudonymeAutreJoueur);
-    this.afficherPartie();
-  }
-
-  ajouterJoueur(pseudonyme) {
-    console.log("ajouterJoueur : " + pseudonyme);
-    this.listeJoueur[pseudonyme] = { score: Jeu.SCORE_INITIAL };
-  }
-
- determinerPremierJoueur() {
-    console.log("Valeurs des dés :", this.desLances);
-    let deJoueur = this.desLances[this.pseudonymeJoueur];
-    this.mettreAJourTour();
-    let deAutreJoueur = this.desLances[this.pseudonymeAutreJoueur];
-    this.mettreAJourTour();
-    if (deJoueur > deAutreJoueur) {
-        console.log(`${this.pseudonymeJoueur} commence la partie !`);
-        this.tourEnCours = this.pseudonymeJoueur;
-        this.boutonJouer.disabled = false;
-        this.mettreAJourTour();
-    } else if (deJoueur < deAutreJoueur) {
-        console.log(`${this.pseudonymeAutreJoueur} commence la partie !`);
-        this.tourEnCours = this.pseudonymeAutreJoueur;
-        this.boutonJouer.disabled = true;
-        this.mettreAJourTour();
-    } else {
-        console.log("Égalité ! Relancez les dés...");
-        this.desLances = {};
-        this.messageTour.innerText = "Égalité ! Relancez les dés...";
-    }
-    this.compteurTour;
-    console.log(`Début du Tour ${this.compteurTour}`);
+  creerDonneesParDefaut() {
+    return {
+      version: 2,
+      pseudonyme: "",
+      statistiques: {
+        victoires: 0,
+        defaites: 0
+      },
+      preferences: {
+        theme: "clair"
+      }
+    };
   }
 
   sauvegarderDonneesLocal(donnees = this.donnees) {
@@ -133,184 +157,363 @@ class Jeu {
     }
   }
 
-  recevoirVariable(variable) {
-    console.log("recevoirVariable " + variable.cle + " = " + variable.valeur);
-    let message = JSON.parse(variable.valeur);
-    if (variable.cle === Jeu.MESSAGE.JOUER) {
-      this.desLances[message.pseudonyme] = message.valeur;
-      console.log(`Le joueur ${message.pseudonyme} a lancé un dé et obtenu ${message.valeur}`);
-      if (Object.keys(this.desLances).length === Jeu.NOMBRE_JOUEUR_REQUIS) {
-          console.log("Tous les joueurs ont lancé leur dé. Déterminons qui commence !");
-          if (!this.tourEnCours) {
-            this.determinerPremierJoueur();
-          } else {
-            console.log("Début du deuxième tour !");
-            this.boutonJouer.disabled = false;
-          }
-          }
-      } else if (variable.cle === Jeu.MESSAGE.SCORE) {
-      let message = JSON.parse(variable.valeur);
-      console.log(`Mise à jour du score de ${message.pseudonyme} : ${message.valeur}`);
-        if (message.pseudonyme !== this.pseudonymeJoueur) {
-        this.changerScoreAutreJoueur(message.valeur);
-        } else {
-        this.changerScoreJoueur(message.valeur);
-        }
-      }
-    if (variable.cle === "TOUR") {
-    let message = JSON.parse(variable.valeur);
-    console.log(`C'est maintenant au tour de ${message.prochainJoueur}`);
-    if (message.prochainJoueur === this.pseudonymeJoueur) {
-        this.boutonJouer.disabled = false;
-    } else {
-        this.boutonJouer.disabled = true;
+  mettreAJourTour() {
+    this.champTour.value = `Tour ${this.compteurTour}`;
+
+    if (!this.tourEnCours) {
+      this.messageTour.innerText = "En attente du premier joueur...";
+      return;
     }
-    this.tourEnCours = message.prochainJoueur;
-     this.mettreAJourTour();
+
+    const joueurActif =
+      this.tourEnCours === this.pseudonymeJoueur
+        ? this.pseudonymeJoueur
+        : this.pseudonymeAutreJoueur;
+
+    this.messageTour.innerText = `${joueurActif}, c'est le tour de jouer !`;
+
+    if (this.carteJoueur && this.carteAutreJoueur) {
+      this.carteJoueur.classList.toggle(
+        "actif",
+        this.tourEnCours === this.pseudonymeJoueur
+      );
+      this.carteAutreJoueur.classList.toggle(
+        "actif",
+        this.tourEnCours === this.pseudonymeAutreJoueur
+      );
+    }
   }
+
+  afficherDes(valeur1, valeur2) {
+    this.champDe1.value = valeur1;
+    this.champDe2.value = valeur2;
+
+    if (this.champDe1.dataset) this.champDe1.dataset.valeur = valeur1;
+    if (this.champDe2.dataset) this.champDe2.dataset.valeur = valeur2;
+  }
+
+  fermerFenetreRegles() {
+    if (this.fenetreRegles) {
+      this.fenetreRegles.classList.add("fenetre-cachee");
+      localStorage.setItem("regles-vues", "oui");
+    }
+  }
+
+  // =========================
+  // AUTHENTIFICATION
+  // =========================
+
+  confirmerConnexion() {
+    this.pseudonymeJoueur = this.champPseudonyme.value.trim();
+
+    if (!this.pseudonymeJoueur) {
+      alert("Veuillez entrer un pseudonyme.");
+      this.boutonAuthentification.disabled = false;
+      return;
+    }
+
+    this.enregistrerPseudonyme();
+    this.multiNode.demanderAuthentification(this.pseudonymeJoueur);
+  }
+
+  confirmerAuthentification(autresParticipants) {
+    this.formulaireAuthentification.querySelector("fieldset").disabled = true;
+    this.ajouterJoueur(this.pseudonymeJoueur);
+
+    if (autresParticipants.length > 0) {
+      this.pseudonymeAutreJoueur = autresParticipants[0];
+      this.ajouterJoueur(this.pseudonymeAutreJoueur);
+      this.phaseJeu = Jeu.PHASE.LANCER_INITIAL;
+      this.afficherPartie();
+    } else {
+      this.mettreAJourStatut("Connecté. En attente d’un autre joueur.");
+    }
+  }
+
+  apprendreAuthentification(pseudonyme) {
+    if (!this.listeJoueur[pseudonyme]) {
+      this.ajouterJoueur(pseudonyme);
+    }
+
+    this.pseudonymeAutreJoueur = pseudonyme;
+    this.phaseJeu = Jeu.PHASE.LANCER_INITIAL;
+    this.afficherPartie();
+  }
+
+  ajouterJoueur(pseudonyme) {
+    this.listeJoueur[pseudonyme] = {
+      score: Jeu.SCORE_INITIAL
+    };
+  }
+
+  afficherPartie() {
+    if (!this.pseudonymeAutreJoueur) {
+      return;
+    }
+
+    this.informationAutreJoueur.innerHTML =
+      `Adversaire connecté : <strong>${this.pseudonymeAutreJoueur}</strong>`;
+
+    this.champScore.value = this.listeJoueur[this.pseudonymeJoueur].score;
+    this.champScoreAutreJoueur.value =
+      this.listeJoueur[this.pseudonymeAutreJoueur].score;
+
+    this.formulaireJeu.style.display = "block";
+    this.boutonJouer.disabled = false;
+
+    this.messageTour.innerText =
+      "Chaque joueur doit lancer un dé pour déterminer qui commence.";
+    this.mettreAJourStatut("Partie prête");
   }
 
   soumettreAuthentificationJoueur(evenementsubmit) {
-    console.log("soumettreAuthentificationJoueur");
     evenementsubmit.preventDefault();
     this.multiNode.connecter();
     this.boutonAuthentification.disabled = true;
   }
 
-  afficherPartie() {
-    if (!this.pseudonymeAutreJoueur) {
-      console.log("Aucun autre joueur détecté pour démarrer la partie.");
-      return;
-    }
-    this.informationAutreJoueur.innerHTML = this.informationAutreJoueur.innerHTML.replace("{nom-autre-joueur}", this.pseudonymeAutreJoueur);
-    this.champScoreAutreJoueur.value = this.listeJoueur[this.pseudonymeAutreJoueur].score;
-    this.champScore.value = this.listeJoueur[this.pseudonymeJoueur].score;
-    this.formulaireJeu.style.display = "block";
-    console.log("Affichage de la partie terminé, détermination du premier joueur...");
-    this.determinerPremierJoueur();
-  }
+  // =========================
+  // LOGIQUE DE JEU
+  // =========================
 
   genererValeurDe() {
     return Math.floor(Math.random() * Jeu.POINT_MAXIMUM) + 1;
   }
 
   soumettreJeu(evenementsubmit) {
-    console.log("soumettreJeu");
     evenementsubmit.preventDefault();
-    if (!this.tourEnCours) {
-        let valeurDe = this.genererValeurDe();
-        this.champJouer.value = valeurDe;
-        let message = {
-            pseudonyme: this.pseudonymeJoueur,
-            valeur: valeurDe
-        };
-        this.multiNode.posterVariableTextuelle(Jeu.MESSAGE.JOUER, JSON.stringify(message));
-    } else {
-        console.log("Le deuxième tour commence !");
-        this.boutonJouer.disabled = true;
-        this.jouerDeuxiemeTour();
+
+    if (this.partieTerminee) return;
+
+    if (this.phaseJeu === Jeu.PHASE.LANCER_INITIAL) {
+      this.lancerDeInitial();
+      return;
+    }
+
+    if (this.phaseJeu === Jeu.PHASE.PARTIE_EN_COURS) {
+      this.jouerTourPrincipal();
     }
   }
 
-  jouerDeuxiemeTour() {
-    console.log(`Tour ${this.compteurTour} en cours...`);
-    let joueurActif = this.tourEnCours;
-    if (joueurActif !== this.pseudonymeJoueur) {
-        return;
-    }
-    console.log(`${joueurActif}, c'est votre tour de lancer deux dés !`);
-    let valeurDe1 = this.genererValeurDe();
-    let valeurDe2 = this.genererValeurDe();
-    console.log(`Dés lancés : ${valeurDe1} et ${valeurDe2}`);
-    this.champDe1.value = valeurDe1;
-    this.champDe2.value = valeurDe2;
-    if (valeurDe1 === valeurDe2) {
-        console.log(`${joueurActif} a fait un doublé, il peut rejouer !`);
-        this.messageTour.innerText="vous avez un doublez! rejouez!";
-        this.boutonJouer.disabled = false;
-        this.multiNode.posterVariableTextuelle("RETOUR", JSON.stringify({ pseudo: joueurActif }));
-        return;
-    } else if (valeurDe1 !== valeurDe2) {
-        this.compteurTour++;
-        this.mettreAJourTour();
-    }
-    let nouveauScore = this.listeJoueur[joueurActif].score + valeurDe1 + valeurDe2;
-    if (joueurActif === this.pseudonymeJoueur) {
-        this.changerScoreJoueur(nouveauScore);
-    } else {
-        this.changerScoreAutreJoueur(nouveauScore);
-    }
-    this.tourEnCours = (joueurActif === this.pseudonymeJoueur) ? this.pseudonymeAutreJoueur : this.pseudonymeJoueur;
-    let message = {
-        prochainJoueur: this.tourEnCours
-    };
-    this.multiNode.posterVariableTextuelle("TOUR", JSON.stringify(message));
+  lancerDeInitial() {
     this.boutonJouer.disabled = true;
-     this.mettreAJourTour();
+
+    const valeurDe = this.genererValeurDe();
+    this.champJouer.value = valeurDe;
+
+    const message = {
+      pseudonyme: this.pseudonymeJoueur,
+      valeur: valeurDe
+    };
+
+    this.desLances[this.pseudonymeJoueur] = valeurDe;
+    this.multiNode.posterVariableTextuelle(
+      Jeu.MESSAGE.JOUER,
+      JSON.stringify(message)
+    );
+
+    this.mettreAJourStatut("Dé initial lancé");
+  }
+
+  determinerPremierJoueur() {
+    const deJoueur = this.desLances[this.pseudonymeJoueur];
+    const deAutreJoueur = this.desLances[this.pseudonymeAutreJoueur];
+
+    if (typeof deJoueur !== "number" || typeof deAutreJoueur !== "number") {
+      return;
+    }
+
+    if (deJoueur > deAutreJoueur) {
+      this.tourEnCours = this.pseudonymeJoueur;
+      this.phaseJeu = Jeu.PHASE.PARTIE_EN_COURS;
+      this.boutonJouer.disabled = false;
+      this.mettreAJourStatut(`${this.pseudonymeJoueur} commence`);
+    } else if (deAutreJoueur > deJoueur) {
+      this.tourEnCours = this.pseudonymeAutreJoueur;
+      this.phaseJeu = Jeu.PHASE.PARTIE_EN_COURS;
+      this.boutonJouer.disabled = this.tourEnCours !== this.pseudonymeJoueur;
+      this.mettreAJourStatut(`${this.pseudonymeAutreJoueur} commence`);
+    } else {
+      this.desLances = {};
+      this.messageTour.innerText = "Égalité au lancer initial. Relancez.";
+      this.boutonJouer.disabled = false;
+      this.mettreAJourStatut("Relance initiale requise");
+      return;
+    }
+
+    this.mettreAJourTour();
+  }
+
+  jouerTourPrincipal() {
+    if (this.tourEnCours !== this.pseudonymeJoueur || this.partieTerminee) {
+      return;
+    }
+
+    this.boutonJouer.disabled = true;
+
+    const valeurDe1 = this.genererValeurDe();
+    const valeurDe2 = this.genererValeurDe();
+
+    this.afficherDes(valeurDe1, valeurDe2);
+
+    const total = valeurDe1 + valeurDe2;
+    const nouveauScore = this.listeJoueur[this.pseudonymeJoueur].score + total;
+
+    this.changerScoreJoueur(nouveauScore);
+
+    if (this.partieTerminee) {
+      return;
+    }
+
+    if (valeurDe1 === valeurDe2) {
+      this.messageTour.innerText = "Doublé ! Vous rejouez.";
+      this.multiNode.posterVariableTextuelle(
+        Jeu.MESSAGE.RETOUR,
+        JSON.stringify({ pseudo: this.pseudonymeJoueur })
+      );
+      this.boutonJouer.disabled = false;
+      this.mettreAJourStatut("Doublé obtenu");
+      return;
+    }
+
+    this.compteurTour++;
+    this.tourEnCours = this.pseudonymeAutreJoueur;
+
+    this.multiNode.posterVariableTextuelle(
+      Jeu.MESSAGE.TOUR,
+      JSON.stringify({
+        prochainJoueur: this.tourEnCours,
+        compteurTour: this.compteurTour
+      })
+    );
+
+    this.mettreAJourTour();
+  }
+
+  recevoirVariable(variable) {
+    const message = JSON.parse(variable.valeur);
+
+    if (variable.cle === Jeu.MESSAGE.JOUER) {
+      this.desLances[message.pseudonyme] = message.valeur;
+
+      if (
+        this.phaseJeu === Jeu.PHASE.LANCER_INITIAL &&
+        Object.keys(this.desLances).length === Jeu.NOMBRE_JOUEUR_REQUIS
+      ) {
+        this.determinerPremierJoueur();
+      }
+      return;
+    }
+
+    if (variable.cle === Jeu.MESSAGE.SCORE) {
+      if (message.pseudonyme !== this.pseudonymeJoueur) {
+        this.mettreScoreLocalAutre(message.valeur);
+      }
+      return;
+    }
+
+    if (variable.cle === Jeu.MESSAGE.TOUR) {
+      this.tourEnCours = message.prochainJoueur;
+      this.compteurTour = message.compteurTour || this.compteurTour;
+      this.boutonJouer.disabled = this.tourEnCours !== this.pseudonymeJoueur;
+      this.mettreAJourTour();
+      return;
+    }
+
+    if (variable.cle === Jeu.MESSAGE.RETOUR) {
+      this.tourEnCours = message.pseudo;
+      this.boutonJouer.disabled = this.tourEnCours !== this.pseudonymeJoueur;
+      this.mettreAJourTour();
+      return;
+    }
+
+    if (variable.cle === Jeu.MESSAGE.FIN) {
+      this.finDePartie(message.gagnant, false);
+    }
   }
 
   changerScoreJoueur(nouveauScore) {
-    console.log("changerScoreJoueur()=>valeur " + nouveauScore);
     if (this.listeJoueur[this.pseudonymeJoueur].score === nouveauScore) {
-        console.log("Le score du joueur est déjà à jour, aucune mise à jour envoyée.");
-        return;
+      return;
     }
+
     this.listeJoueur[this.pseudonymeJoueur].score = nouveauScore;
     this.champScore.value = nouveauScore;
-    let message = {
+
+    this.multiNode.posterVariableTextuelle(
+      Jeu.MESSAGE.SCORE,
+      JSON.stringify({
         pseudonyme: this.pseudonymeJoueur,
         valeur: nouveauScore
-    };
-    this.multiNode.posterVariableTextuelle(Jeu.MESSAGE.SCORE, JSON.stringify(message));
+      })
+    );
+
     if (nouveauScore >= this.scoreMax) {
-        this.changerScoreJoueur(nouveauScore);
-        console.log(`${this.pseudonymeJoueur} a gagné avec ${nouveauScore} points !`);
-        this.finDePartie(this.pseudonymeJoueur);
+      this.multiNode.posterVariableTextuelle(
+        Jeu.MESSAGE.FIN,
+        JSON.stringify({ gagnant: this.pseudonymeJoueur })
+      );
+      this.finDePartie(this.pseudonymeJoueur, true);
     }
   }
 
-  changerScoreAutreJoueur(nouveauScore) {
-    console.log("changerScoreAutreJoueur()=>valeur " + nouveauScore);
-    if (this.listeJoueur[this.pseudonymeAutreJoueur].score === nouveauScore) {
-        console.log("Le score de l'autre joueur est déjà à jour, aucune mise à jour envoyée.");
-        return;
-    }
+  mettreScoreLocalAutre(nouveauScore) {
     this.listeJoueur[this.pseudonymeAutreJoueur].score = nouveauScore;
     this.champScoreAutreJoueur.value = nouveauScore;
-    let message = {
-        pseudonyme: this.pseudonymeAutreJoueur,
-        valeur: nouveauScore
-    };
-    this.multiNode.posterVariableTextuelle(Jeu.MESSAGE.SCORE, JSON.stringify(message));
-    if (nouveauScore >= this.scoreMax) {
-        this.changerScoreAutreJoueur(nouveauScore);
-        console.log(`${this.pseudonymeAutreJoueur} a gagné avec ${nouveauScore} points !`);
-        this.finDePartie(this.pseudonymeAutreJoueur);
-    }
   }
 
-  finDePartie(gagnant) {
-    console.log(`La partie est terminée. ${gagnant} a gagné !`);
-    let perdant = (gagnant === this.pseudonymeJoueur) ? this.pseudonymeAutreJoueur : this.pseudonymeJoueur;
-    let messageFinal = `${gagnant} a gagné ! 🎉\n${perdant} a perdu. 😢`;
-    this.resultatFinal.innerText = messageFinal;
-     alert(`${gagnant} a gagné !`);
+  finDePartie(gagnant, estLocale = false) {
+    if (this.partieTerminee) return;
+
+    this.partieTerminee = true;
+    this.phaseJeu = Jeu.PHASE.TERMINEE;
+
+    const perdant =
+      gagnant === this.pseudonymeJoueur
+        ? this.pseudonymeAutreJoueur
+        : this.pseudonymeJoueur;
+
+    this.resultatFinal.innerText = `${gagnant} a gagné ! 🎉  ${perdant} a perdu.`;
+    this.messageTour.innerText = "La partie est terminée.";
+    this.mettreAJourStatut("Partie terminée");
+
+    if (gagnant === this.pseudonymeJoueur) {
+      this.incrementerVictoire();
+    } else {
+      this.incrementerDefaite();
+    }
+
     this.boutonJouer.disabled = true;
     this.boutonAuthentification.disabled = true;
-    this.formulaireJeu.querySelectorAll("button").forEach((button) => {
-        button.disabled = true;
-    });
-     this.boutonJouer.disabled = true;
-     this.boutonAuthentification.disabled = true;
 
+    this.formulaireJeu.querySelectorAll("button, input[type='submit']").forEach((element) => {
+      element.disabled = true;
+    });
+
+    if (estLocale) {
+      alert("Victoire !");
+    }
   }
 }
 
 Jeu.NOMBRE_JOUEUR_REQUIS = 2;
 Jeu.SCORE_INITIAL = 0;
 Jeu.POINT_MAXIMUM = 6;
+Jeu.CLE_STOCKAGE = "jeu-des-multijoueur";
+
+Jeu.PHASE = {
+  ATTENTE_JOUEURS: "ATTENTE_JOUEURS",
+  LANCER_INITIAL: "LANCER_INITIAL",
+  PARTIE_EN_COURS: "PARTIE_EN_COURS",
+  TERMINEE: "TERMINEE"
+};
+
 Jeu.MESSAGE = {
   JOUER: "JOUER",
   SCORE: "SCORE",
+  TOUR: "TOUR",
+  RETOUR: "RETOUR",
+  FIN: "FIN"
 };
+
 new Jeu();
