@@ -12,6 +12,8 @@ class Jeu {
     this.pseudonymeJoueur = "";
     this.pseudonymeAutreJoueur = "";
 
+
+
     this.scoreMax = 60;
     this.compteurTour = 1;
     this.tourEnCours = null;
