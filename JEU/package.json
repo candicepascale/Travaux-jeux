@@ -1,0 +1,20 @@
+{
+  "name": "jeu-des-multijoueur",
+  "productName": "Jeu de Des Multijoueur",
+  "version": "1.0.0",
+  "description": "Jeu de dés multijoueur maintenu et empaqueté avec Electron",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.8.1",
+    "@electron-forge/maker-deb": "^7.8.1",
+    "@electron-forge/maker-rpm": "^7.8.1",
+    "@electron-forge/maker-squirrel": "^7.8.1",
+    "@electron-forge/maker-zip": "^7.8.1",
+    "electron": "^37.2.0"
+  }
+}
